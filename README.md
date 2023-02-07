@@ -138,9 +138,24 @@ gcloud container fleet memberships register ${CLUSTER_1} --gke-cluster=${CLUSTER
 gcloud container fleet memberships register ${CLUSTER_2} --gke-cluster=${CLUSTER_2_ZONE}/${CLUSTER_2} --enable-workload-identity
 ```
 
+## Install Anthos Service Mesh
+```bash
+gcloud container fleet mesh update --management automatic --memberships ${CLUSTER_1},${CLUSTER_2}
+```
+### Set up ingress gateways for Anthos Service Mesh on both clusters
+```bash
+kubectl --context=${CLUSTER_1} create namespace asm-ingress
+kubectl --context=${CLUSTER_1} label namespace asm-ingress istio-injection=enabled --overwrite
+kubectl --context=${CLUSTER_1} apply -f asm-ingress.yaml
+```
 
+```bash
+kubectl --context=${CLUSTER_2} create namespace asm-ingress
+kubectl --context=${CLUSTER_2} label namespace asm-ingress istio-injection=enabled --overwrite
+kubectl --context=${CLUSTER_2} apply -f asm-ingress.yaml
+```
 
-## Verify that the Anthos Service Mesh ingress gateways are deployed:
+## Verify that the ingress gateways for Anthos Service Mesh have been successfully deployed
 ```bash
 kubectl --context=${CLUSTER_1} get pod,service -n asm-ingress
 kubectl --context=${CLUSTER_2} get pod,service -n asm-ingress
