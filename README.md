@@ -76,6 +76,9 @@ gcloud compute firewall-rules create all-pods-and-master-ipv4-cidrs \
   --source-ranges 10.0.0.0/8,${CLUSTER_1_MASTER_IPV4_CIDR},${CLUSTER_2_MASTER_IPV4_CIDR},${CLUSTER_INGRESS_MASTER_IPV4_CIDR}
 ```
 
+### check Cloud NAT on GCP Console
+![GCP-Cloud-NAT](https://github.com/MollyH1391/Practice-GCP-Anthos-Service-Mesh-Real-World-Microservices-Project/blob/980307ab25df2ffd10df1315c1a14e8843c12db7/GUI/nat.png)
+
 
 
 
