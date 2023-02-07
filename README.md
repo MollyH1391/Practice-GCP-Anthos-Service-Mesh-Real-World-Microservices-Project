@@ -1,7 +1,7 @@
 # Practice: GCP-Anthos-Service-Mesh-Real-World-Microservices-Project DEMO
 
 The look of the microservices after they have been deployed on the web will be similar to the GIF below.
-![bank-of-anthos]()
+![bank-of-anthos-demo](https://github.com/MollyH1391/Practice-GCP-Anthos-Service-Mesh-Real-World-Microservices-Project/blob/268b91b5d51f8563c434205979f8e4910d8d9930/GUI/bank-of-anthos.gif)
 
 ## prerequisite
 - This practice follows the GCP doc: [Running distributed services on GKE private clusters using Anthos Service Mesh](https://cloud.google.com/architecture/distributed-services-on-gke-private-using-anthos-service-mesh)
