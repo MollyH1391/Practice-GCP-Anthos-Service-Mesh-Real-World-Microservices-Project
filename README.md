@@ -80,6 +80,64 @@ gcloud compute firewall-rules create all-pods-and-master-ipv4-cidrs \
 ![GCP-Cloud-NAT](https://github.com/MollyH1391/Practice-GCP-Anthos-Service-Mesh-Real-World-Microservices-Project/blob/980307ab25df2ffd10df1315c1a14e8843c12db7/GUI/nat.png)
 
 
+## Create two GKE Clusters that have authorized networks
+```bash
+gcloud container clusters create ${CLUSTER_1} \
+  --project ${PROJECT_ID} \
+  --zone=${CLUSTER_1_ZONE} \
+  --machine-type "e2-standard-4" \
+  --num-nodes "3" --min-nodes "3" --max-nodes "5" \
+  --enable-ip-alias --enable-autoscaling \
+  --workload-pool=${WORKLOAD_POOL} \
+  --enable-private-nodes \
+  --master-ipv4-cidr=${CLUSTER_1_MASTER_IPV4_CIDR} \
+  --enable-master-authorized-networks \
+  --master-authorized-networks $NAT_REGION_1_IP_ADDR/32,$NAT_REGION_2_IP_ADDR/32,$CLOUDSHELL_IP/32 \
+  --labels=mesh_id=${MESH_ID} --async
+
+gcloud container clusters create ${CLUSTER_2} \
+  --project ${PROJECT_ID} \
+  --zone=${CLUSTER_2_ZONE} \
+  --machine-type "e2-standard-4" \
+  --num-nodes "3" --min-nodes "3" --max-nodes "5" \
+  --enable-ip-alias --enable-autoscaling \
+  --workload-pool=${WORKLOAD_POOL} \
+  --enable-private-nodes \
+  --master-ipv4-cidr=${CLUSTER_2_MASTER_IPV4_CIDR} \
+  --enable-master-authorized-networks \
+  --master-authorized-networks $NAT_REGION_1_IP_ADDR/32,$NAT_REGION_2_IP_ADDR/32,$CLOUDSHELL_IP/32 \
+  --labels=mesh_id=${MESH_ID}
+```
+### Confirm that all created clusters are in a running state
+```bash
+gcloud container clusters list
+
+NAME              LOCATION       MASTER_VERSION   MASTER_IP       MACHINE_TYPE   NODE_VERSION     NUM_NODES  STATUS
+gke-central-priv  us-central1-a  1.24.8-gke.2000  35.222.61.224   e2-standard-4  1.24.8-gke.2000  3          RUNNING
+gke-west-priv     us-west2-a     1.24.8-gke.2000  35.236.118.209  e2-standard-4  1.24.8-gke.2000  3          RUNNING
+
+```
+
+### Connect to both clusters to generate entries in the kubeconfig file and rename them
+```bash
+touch ~/asm-kubeconfig && export KUBECONFIG=~/asm-kubeconfig
+gcloud container clusters get-credentials ${CLUSTER_1} --zone ${CLUSTER_1_ZONE}
+gcloud container clusters get-credentials ${CLUSTER_2} --zone ${CLUSTER_2_ZONE}
+
+kubectl config rename-context \
+gke_${PROJECT_ID}_${CLUSTER_1_ZONE}_${CLUSTER_1} ${CLUSTER_1}
+
+kubectl config rename-context \
+gke_${PROJECT_ID}_${CLUSTER_2_ZONE}_${CLUSTER_2} ${CLUSTER_2}
+
+```
+
+### Register your clusters to a fleet
+```bash
+gcloud container fleet memberships register ${CLUSTER_1} --gke-cluster=${CLUSTER_1_ZONE}/${CLUSTER_1} --enable-workload-identity
+gcloud container fleet memberships register ${CLUSTER_2} --gke-cluster=${CLUSTER_2_ZONE}/${CLUSTER_2} --enable-workload-identity
+```
+
 
 
 ## Verify that the Anthos Service Mesh ingress gateways are deployed:
