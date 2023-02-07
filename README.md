@@ -302,6 +302,10 @@ kubectl --context ${CLUSTER_2} \
 
 {"ingress":[{"ip":"34.132.210.236"}]}
 ```
+![publicIP-access](https://github.com/MollyH1391/Practice-GCP-Anthos-Service-Mesh-Real-World-Microservices-Project/blob/b03cc7ed2631cb08792c3e374721522974d862b1/GUI/access.png)
+
+## Visualize services on google cloud console
+
 
 ## Register the config cluster:
 ```bash
