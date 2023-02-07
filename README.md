@@ -258,10 +258,14 @@ transactionhistory-86c78b6647-bw8k4   2/2     Running   1 (4m4s ago)   6m25s
 userservice-59dc7c6885-45bn6          2/2     Running   0              6m24s
 ```
 
+## Configure Multi Cluster Ingress on the Bank of Anthos frontend services
+```bash
+kubectl --context=$CLUSTER_1 apply -f asm-vs-gateway.yaml
 
+kubectl --context=$CLUSTER_2 apply -f asm-vs-gateway.yaml
+```
 
-## use the ictioctl tool to inspect the proxy-config of any of the proxies. Doing this lets you see that the sidecar proxies see two Pods for every service, with one Pod running in each cluster.
-
+## inspect the proxy-config of any of the proxies
 ```bash
 export FRONTEND1=$(kubectl get pod -n bank-of-anthos -l app=frontend \
   --context=${CLUSTER_1} -o jsonpath='{.items[0].metadata.name}')
