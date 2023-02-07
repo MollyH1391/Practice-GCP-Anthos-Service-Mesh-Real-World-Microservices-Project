@@ -3,6 +3,9 @@
 The look of the microservices after they have been deployed on the web will be similar to the GIF below.
 ![bank-of-anthos-demo](https://github.com/MollyH1391/Practice-GCP-Anthos-Service-Mesh-Real-World-Microservices-Project/blob/268b91b5d51f8563c434205979f8e4910d8d9930/GUI/bank-of-anthos.gif)
 
+## Architecture
+![ASM-Architecture]()
+
 ## prerequisite
 - This practice follows the GCP doc: [Running distributed services on GKE private clusters using Anthos Service Mesh](https://cloud.google.com/architecture/distributed-services-on-gke-private-using-anthos-service-mesh)
 - GCP Fleet: 
@@ -176,6 +179,20 @@ NAME                         TYPE           CLUSTER-IP   EXTERNAL-IP      PORT(S
 service/asm-ingressgateway   LoadBalancer   10.80.1.69   34.132.210.236   80:32316/TCP,443:32409/TCP   43s
 ```
 
+## Create and label a bank-of-anthos namespace in both clusters.
+
+The label allows automatic injection of the sidecar Envoy proxies in every Pod within the labeled namespace.
+
+```bash
+# cluster_1
+kubectl create --context=${CLUSTER_1} namespace bank-of-anthos
+kubectl label --context=${CLUSTER_1} namespace bank-of-anthos istio-injection=enabled
+
+# cluster_2
+kubectl create --context=${CLUSTER_2} namespace bank-of-anthos
+kubectl label --context=${CLUSTER_2} namespace bank-of-anthos istio-injection=enabled
+```
+
 ## Deploy the Bank of Anthos application to both clusters in the bank-of-anthos namespace.
 
 ```bash
@@ -205,6 +222,15 @@ deployment.apps/userservice created
 service/userservice created
 ```
 
+change the --context to CLUSTER_2 and execute the command again.
+
+## Delete the StatefulSets from one cluster 
+Make sure the two PostgreSQL databases exist in only one of the clusters
+```bash
+kubectl --context=$CLUSTER_2 -n bank-of-anthos delete statefulset accounts-db
+kubectl --context=$CLUSTER_2 -n bank-of-anthos delete statefulset ledger-db
+```
+
 ## Make sure that all Pods are running in both clusters:
 ```bash
 kubectl --context=${CLUSTER_1} -n bank-of-anthos get pod
@@ -231,6 +257,7 @@ loadgenerator-8647b69f9-m8fbm         2/2     Running   0              6m25s
 transactionhistory-86c78b6647-bw8k4   2/2     Running   1 (4m4s ago)   6m25s
 userservice-59dc7c6885-45bn6          2/2     Running   0              6m24s
 ```
+
 
 
 ## use the ictioctl tool to inspect the proxy-config of any of the proxies. Doing this lets you see that the sidecar proxies see two Pods for every service, with one Pod running in each cluster.
