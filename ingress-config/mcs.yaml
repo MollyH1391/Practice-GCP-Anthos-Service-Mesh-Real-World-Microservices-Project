@@ -1,0 +1,18 @@
+apiVersion: networking.gke.io/v1beta1
+kind: MultiClusterService
+metadata:
+  name: asm-ingressgateway-multicluster-svc
+  annotations:
+    beta.cloud.google.com/backend-config: '{"ports": {"80":"gke-ingress-config"}}'
+spec:
+  template:
+    spec:
+      selector:
+        asm: ingressgateway
+      ports:
+      - name: frontend
+        protocol: TCP
+        port: 80 # servicePort defined in Multi Cluster Ingress
+  clusters:
+  - link: "us-west2-a/gke-west-priv"
+  - link: "us-central1-a/gke-central-priv"

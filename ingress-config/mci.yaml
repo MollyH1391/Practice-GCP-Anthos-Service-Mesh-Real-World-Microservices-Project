@@ -1,0 +1,10 @@
+apiVersion: networking.gke.io/v1beta1
+kind: MultiClusterIngress
+metadata:
+  name: asm-ingressgateway-multicluster-ingress
+spec:
+  template:
+    spec:
+      backend:
+       serviceName: asm-ingressgateway-multicluster-svc
+       servicePort: 80
