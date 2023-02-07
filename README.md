@@ -1,5 +1,8 @@
 # Practice: GCP-Anthos-Service-Mesh-Real-World-Microservices-Project DEMO
 
+## prerequisite
+- GCP Fleet: 
+  - Namespace sameness: Namespaces with the same name in different clusters are considered the same by many components. [GCP-Namespace-Sameness](https://cloud.google.com/anthos/fleet-management/docs/fleet-concepts#namespace_sameness)
 
 
 ## Verify that the Anthos Service Mesh ingress gateways are deployed:
