@@ -309,7 +309,30 @@ kubectl --context ${CLUSTER_2} \
 
 ![topology-view](https://github.com/MollyH1391/Practice-GCP-Anthos-Service-Mesh-Real-World-Microservices-Project/blob/6c0116cad537a79ad7f5c8867c602e97d184a505/GUI/topology-view.gif)
 
-## Register the config cluster:
+## Create the ingress-config cluster and rename it
+### Enable the required Anthos, GKE Fleet, and Multi Cluster Ingress APIs
+```bash
+gcloud services enable \
+  anthos.googleapis.com \
+  multiclusterservicediscovery.googleapis.com \
+  multiclusteringress.googleapis.com
+```
+
+```bash
+gcloud container clusters create ${CLUSTER_INGRESS} \
+  --zone ${CLUSTER_INGRESS_ZONE} \
+  --num-nodes=1 \
+  --enable-ip-alias \
+  --workload-pool=${WORKLOAD_POOL}
+
+gcloud container clusters get-credentials ${CLUSTER_INGRESS} \
+  --zone ${CLUSTER_INGRESS_ZONE} --project ${PROJECT_ID}
+
+kubectl config rename-context \
+  gke_${PROJECT_ID}_${CLUSTER_INGRESS_ZONE}_${CLUSTER_INGRESS} ${CLUSTER_INGRESS}
+```
+
+### Register the config cluster:
 ```bash
 gcloud container fleet memberships register ${CLUSTER_INGRESS} \
   --project=${PROJECT_ID} \
@@ -317,7 +340,7 @@ gcloud container fleet memberships register ${CLUSTER_INGRESS} \
   --enable-workload-identity
 ```
 
-## Verify that all clusters are registered to Anthos Fleet:
+### Verify that all clusters are registered to Anthos Fleet:
 ```bash
 gcloud container fleet memberships list
 
@@ -327,14 +350,15 @@ gke-central     6f1f6bb2-a3f6-4e9c-be52-6907d9d258cd
 gke-ingress     3574ee0f-b7e6-11ea-9787-42010a8a019c
 ```
 
-## Enable Multi Cluster Ingress features on the ingress-config cluster. This creates the MulticlusterService and MulticlusterIngress CustomResourceDefinitions (CRDs) on the cluster.
+### Enable Multi Cluster Ingress features on the ingress-config cluster. 
+This creates the MulticlusterService and MulticlusterIngress CustomResourceDefinitions (CRDs) on the cluster.
 
 ```bash
 gcloud container fleet ingress enable \
   --config-membership=projects/${PROJECT_ID}/locations/global/memberships/${CLUSTER_INGRESS}
 ```
 
-## Verify that Multi Cluster Ingress is enabled on the ingress-config cluster:
+### Verify that Multi Cluster Ingress is enabled on the ingress-config cluster:
 ```bash
 gcloud container fleet ingress describe
 
@@ -366,7 +390,7 @@ state:
 updateTime: '2023-02-07T05:06:10.858356205Z'
 ```
 
-## Verify that the two CRDs are deployed in the ingress-config cluster:
+### Verify that the two CRDs are deployed in the ingress-config cluster:
 ```bash
 kubectl --context=${CLUSTER_INGRESS} get crd | grep multicluster
 
@@ -374,7 +398,11 @@ multiclusteringresses.networking.gke.io          2023-02-07T05:06:02Z
 multiclusterservices.networking.gke.io           2023-02-07T05:06:02Z
 ```
 
-## Apply the BackendConfig, MultiClusterService, and MultiClusterIngress manifests:
+## Create the asm-ingress namespace in the ingress-config cluster
+```bash
+kubectl --context ${CLUSTER_INGRESS} create namespace asm-ingress
+```
+### Apply the BackendConfig, MultiClusterService, and MultiClusterIngress manifests:
 
 ```bash
 kubectl --context ${CLUSTER_INGRESS} -n asm-ingress apply -f backendconfig.yaml
@@ -393,8 +421,7 @@ kubectl --context ${CLUSTER_INGRESS} -n asm-ingress apply -f mcs.yaml
 
 multiclusterservice.networking.gke.io/asm-ingressgateway-multicluster-svc created
 ```
-
-## The MultiClusterService you deployed in the Ingress Cluster will create a "headless" Service in cluster 1 and cluster 2. Verify that the "headless" Services have been created:
+The MultiClusterService you deployed in the Ingress Cluster will create a "headless" Service in cluster 1 and cluster 2. Verify that the "headless" Services have been created:
 ```bash
 kubectl --context=${CLUSTER_1} -n asm-ingress \
   get services | grep multicluster-svc
@@ -407,8 +434,7 @@ kubectl --context=${CLUSTER_2} -n asm-ingress \
 mci-asm-ingressgateway-multicluster-svc-svc-n24b1tpu2mm1ak88   ClusterIP      None         <none>           80/TCP                       63s
 ```
 
-## Run the following command and wait until you get a Cloud Load Balancing IP address:
-
+## Get a Cloud Load Balancing IP address
 ```bash
 watch kubectl --context ${CLUSTER_INGRESS} -n asm-ingress get multiclusteringress \
   -o jsonpath="{.items[].status.VIP}"
@@ -416,7 +442,7 @@ watch kubectl --context ${CLUSTER_INGRESS} -n asm-ingress get multiclusteringres
 34.120.223.118
 ```
 
-## Navigate to the Cloud Load Balancing IP address in a web browser to get to the Bank of Anthos frontend:
+Navigate to the Cloud Load Balancing IP address in a web browser to get to the Bank of Anthos frontend:
 ```bash
 kubectl --context ${CLUSTER_INGRESS} \
   -n asm-ingress get multiclusteringress \
