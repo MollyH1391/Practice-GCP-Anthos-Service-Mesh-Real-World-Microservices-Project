@@ -288,7 +288,8 @@ istioctl proxy-config endpoints \
 10.76.2.9:8080                                          HEALTHY     OK                outbound|8080||transactionhistory.bank-of-anthos.svc.cluster.local
 ```
 
-## access the Bank of Anthos application, you can use the asm-ingressgateway Service public IP address from either cluster.
+## Access the Bank of Anthos application
+use the asm-ingressgateway Service public IP address from either cluster
 
 ```bash
 kubectl --context ${CLUSTER_1} \
