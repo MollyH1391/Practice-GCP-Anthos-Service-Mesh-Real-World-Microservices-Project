@@ -4,7 +4,7 @@ The look of the microservices after they have been deployed on the web will be s
 ![bank-of-anthos-demo](https://github.com/MollyH1391/Practice-GCP-Anthos-Service-Mesh-Real-World-Microservices-Project/blob/268b91b5d51f8563c434205979f8e4910d8d9930/GUI/bank-of-anthos.gif)
 
 ## Architecture
-![ASM-Architecture]()
+![ASM-Architecture](https://github.com/MollyH1391/Practice-GCP-Anthos-Service-Mesh-Real-World-Microservices-Project/blob/6c0116cad537a79ad7f5c8867c602e97d184a505/GUI/topology.png)
 
 ## prerequisite
 - This practice follows the GCP doc: [Running distributed services on GKE private clusters using Anthos Service Mesh](https://cloud.google.com/architecture/distributed-services-on-gke-private-using-anthos-service-mesh)
@@ -305,7 +305,9 @@ kubectl --context ${CLUSTER_2} \
 ![publicIP-access](https://github.com/MollyH1391/Practice-GCP-Anthos-Service-Mesh-Real-World-Microservices-Project/blob/b03cc7ed2631cb08792c3e374721522974d862b1/GUI/access.png)
 
 ## Visualize services on google cloud console
+![table-view](https://github.com/MollyH1391/Practice-GCP-Anthos-Service-Mesh-Real-World-Microservices-Project/blob/6c0116cad537a79ad7f5c8867c602e97d184a505/GUI/table-view.gif)
 
+![topology-view](https://github.com/MollyH1391/Practice-GCP-Anthos-Service-Mesh-Real-World-Microservices-Project/blob/6c0116cad537a79ad7f5c8867c602e97d184a505/GUI/topology-view.gif)
 
 ## Register the config cluster:
 ```bash
