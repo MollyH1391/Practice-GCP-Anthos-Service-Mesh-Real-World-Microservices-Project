@@ -1,9 +1,82 @@
 # Practice: GCP-Anthos-Service-Mesh-Real-World-Microservices-Project DEMO
 
 ## prerequisite
+- This practice follows the GCP doc: [Running distributed services on GKE private clusters using Anthos Service Mesh](https://cloud.google.com/architecture/distributed-services-on-gke-private-using-anthos-service-mesh)
 - GCP Fleet: 
   - Namespace sameness: Namespaces with the same name in different clusters are considered the same by many components. [GCP-Namespace-Sameness](https://cloud.google.com/anthos/fleet-management/docs/fleet-concepts#namespace_sameness)
   - Service sameness: Services with the same namespace and service name are considered to be the same service. [GCP-Service-Sameness](https://cloud.google.com/anthos/fleet-management/docs/fleet-concepts#service_sameness)
+- Google Cloud CLI installed [gcloud-cli](https://cloud.google.com/sdk/docs/install)
+
+## Networking for private GKE clusters
+Pods in a private GKE cluster do not have public IP addresses assigned to them. Hence, if the Pods need to communicate with resources outside the VPC network, they must use a Cloud NAT gateway. This gateway allows Pods with internal IPs to connect to the internet.
+### Create and reserve two external IP addresses for the two NAT gateways
+```bash
+gcloud compute addresses create ${CLUSTER_1_REGION}-nat-ip \
+  --project=${PROJECT_ID} \
+  --region=${CLUSTER_1_REGION}
+
+gcloud compute addresses create ${CLUSTER_2_REGION}-nat-ip \
+  --project=${PROJECT_ID} \
+  --region=${CLUSTER_2_REGION}
+```
+### Store the IP address and name of the IP addresses in variables
+```bash
+export NAT_REGION_1_IP_ADDR=$(gcloud compute addresses describe ${CLUSTER_1_REGION}-nat-ip \
+  --project=${PROJECT_ID} \
+  --region=${CLUSTER_1_REGION} \
+  --format='value(address)')
+
+export NAT_REGION_1_IP_NAME=$(gcloud compute addresses describe ${CLUSTER_1_REGION}-nat-ip \
+  --project=${PROJECT_ID} \
+  --region=${CLUSTER_1_REGION} \
+  --format='value(name)')
+
+export NAT_REGION_2_IP_ADDR=$(gcloud compute addresses describe ${CLUSTER_2_REGION}-nat-ip \
+  --project=${PROJECT_ID} \
+  --region=${CLUSTER_2_REGION} \
+  --format='value(address)')
+
+export NAT_REGION_2_IP_NAME=$(gcloud compute addresses describe ${CLUSTER_2_REGION}-nat-ip \
+  --project=${PROJECT_ID} \
+  --region=${CLUSTER_2_REGION} \
+  --format='value(name)')
+```
+### Create Cloud NAT gateways in the two regions of the private GKE clusters
+```bash
+gcloud compute routers create rtr-${CLUSTER_1_REGION} \
+  --network=default \
+  --region ${CLUSTER_1_REGION}
+
+gcloud compute routers nats create nat-gw-${CLUSTER_1_REGION} \
+  --router=rtr-${CLUSTER_1_REGION} \
+  --region ${CLUSTER_1_REGION} \
+  --nat-external-ip-pool=${NAT_REGION_1_IP_NAME} \
+  --nat-all-subnet-ip-ranges \
+  --enable-logging
+
+gcloud compute routers create rtr-${CLUSTER_2_REGION} \
+  --network=default \
+  --region ${CLUSTER_2_REGION}
+
+gcloud compute routers nats create nat-gw-${CLUSTER_2_REGION} \
+  --router=rtr-${CLUSTER_2_REGION} \
+  --region ${CLUSTER_2_REGION} \
+  --nat-external-ip-pool=${NAT_REGION_2_IP_NAME} \
+  --nat-all-subnet-ip-ranges \
+  --enable-logging
+```
+
+### Create a firewall rule for Pod-to-Pod communication and Pod-to-API server communication
+```bash
+gcloud compute firewall-rules create all-pods-and-master-ipv4-cidrs \
+  --project ${PROJECT_ID} \
+  --network default \
+  --allow all \
+  --direction INGRESS \
+  --source-ranges 10.0.0.0/8,${CLUSTER_1_MASTER_IPV4_CIDR},${CLUSTER_2_MASTER_IPV4_CIDR},${CLUSTER_INGRESS_MASTER_IPV4_CIDR}
+```
+
+
 
 
 ## Verify that the Anthos Service Mesh ingress gateways are deployed:
