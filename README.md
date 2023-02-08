@@ -4,6 +4,8 @@ The look of the microservices after they have been deployed on the web will be s
 ![bank-of-anthos-demo](https://github.com/MollyH1391/Practice-GCP-Anthos-Service-Mesh-Real-World-Microservices-Project/blob/268b91b5d51f8563c434205979f8e4910d8d9930/GUI/bank-of-anthos.gif)
 
 ## Architecture
+![architecture-overview](https://github.com/MollyH1391/Practice-GCP-Anthos-Service-Mesh-Real-World-Microservices-Project/blob/c3d7a58bedf470c3385d0f8ffe206f21628cfc66/GUI/bank-of-anthos-asm.jpg)
+### ASM Topology
 ![ASM-Architecture](https://github.com/MollyH1391/Practice-GCP-Anthos-Service-Mesh-Real-World-Microservices-Project/blob/6c0116cad537a79ad7f5c8867c602e97d184a505/GUI/topology.png)
 
 ## prerequisite
